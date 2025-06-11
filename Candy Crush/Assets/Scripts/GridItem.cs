@@ -1,49 +1,52 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GridItem : MonoBehaviour
 {
-    public int x;
-    public int y;
+    public int x, y;
+    public int boxIndex;
     public Grid gridManager;
 
-    private Vector3 startPos;
-    private Vector3 mouseOffset;
+    private static GridItem selected = null;
 
     private void OnMouseDown()
     {
-        startPos = transform.position;
-        mouseOffset = transform.position - GetMouseWorldPos();
-    }
-
-    private void OnMouseDrag()
-    {
-        Vector3 mouseWorld = GetMouseWorldPos() + mouseOffset;
-        transform.position = new Vector3(mouseWorld.x, mouseWorld.y, 0f);
-    }
-
-    private void OnMouseUp()
-    {
-        GridItem neighbor = gridManager.GetNeighborIfClose(this);
-
-        if (neighbor != null)
+        if (selected == null)
         {
-            //swap pos with neighbor
-            gridManager.SwapItems(this, neighbor);
+            selected = this;
+            Highlight(true);
         }
         else
         {
-            // no neigbor back to startpos
-            transform.position = startPos;
+            if (IsNeighbor(selected))
+            {
+                // If the new selection is a neighbor, swap items
+                gridManager.SwapItems(selected, this);
+                selected.Highlight(false);
+                selected = null; // Clear selection after swap
+            }
+            else
+            {
+                // select new if not neighbor
+                selected.Highlight(false);
+                selected = this;
+                Highlight(true);
+            }
         }
     }
 
-    private Vector3 GetMouseWorldPos()
+    // Check if is neihgbor
+    bool IsNeighbor(GridItem other)
     {
-        Plane plane = new Plane(Vector3.forward, Vector3.zero);
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (plane.Raycast(ray, out float distance))
-            return ray.GetPoint(distance);
+        int dx = Mathf.Abs(x - other.x);
+        int dy = Mathf.Abs(y - other.y);
+        return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
+    }
 
-        return Vector3.zero;
+    // Highlight or unhighlight this item by changing its color
+    void Highlight(bool on)
+    {
+        var rend = GetComponent<Renderer>();
+        if (rend != null)
+            rend.material.color = on ? Color.yellow : Color.white;
     }
 }
