@@ -6,22 +6,38 @@ public class Grid : MonoBehaviour
 {
     public GameObject box;
     public GameObject[] boxOptions;
-    public int size = 8;
+
+    [SerializeField, Range(10, 50)]
+    private int _x = 20;
+    public int x
+    {
+        get => _x;
+        set => _x = Mathf.Clamp(value, 10, 50);
+    }
+
+    [SerializeField, Range(10, 50)]
+    private int _y = 20;
+    public int y
+    {
+        get => _y;
+        set => _y = Mathf.Clamp(value, 10, 50);
+    }
+
     public float spacing = 1.1f;
 
     public GridItem[,] gridItems;
 
     void Start()
     {
-        gridItems = new GridItem[size, size];
+        gridItems = new GridItem[x, y];
         CreateGrid();
     }
 
     void CreateGrid()
     {
-        for (int x = 0; x < size; x++)
+        for (int i = 0; i < x; i++)
         {
-            for (int y = 0; y < size; y++)
+            for (int j = 0; j < y; j++)
             {
                 int index;
 
@@ -29,27 +45,26 @@ public class Grid : MonoBehaviour
                 {
                     index = Random.Range(0, boxOptions.Length);
                     // no three in row
-                } while (x >= 2 &&
-                    gridItems[x - 1, y] != null &&
-                    gridItems[x - 2, y] != null &&
-                    gridItems[x - 1, y].boxIndex == index &&
-                    gridItems[x - 2, y].boxIndex == index);
+                } while (i >= 2 &&
+                    gridItems[i - 1, j] != null &&
+                    gridItems[i - 2, j] != null &&
+                    gridItems[i - 1, j].boxIndex == index &&
+                    gridItems[i - 2, j].boxIndex == index);
 
-                Vector3 pos = new Vector3(x * spacing, y * spacing, 0);
+                Vector3 pos = new Vector3(i * spacing, j * spacing, 0);
                 Instantiate(box, pos, Quaternion.identity, transform);
                 GameObject go = Instantiate(boxOptions[index], pos, Quaternion.identity, transform);
 
                 GridItem item = go.AddComponent<GridItem>();
-                item.x = x;
-                item.y = y;
+                item.x = i;
+                item.y = j;
                 item.boxIndex = index;
                 item.gridManager = this;
 
-                gridItems[x, y] = item;
+                gridItems[i, j] = item;
             }
         }
     }
-
 
     public void SwapItems(GridItem a, GridItem b)
     {
@@ -88,7 +103,6 @@ public class Grid : MonoBehaviour
         {
             Debug.Log("No three in a row, swapping back.");
 
-            // back to old pos
             gridItems[ax, ay] = a;
             gridItems[bx, by] = b;
 
@@ -102,53 +116,51 @@ public class Grid : MonoBehaviour
         }
     }
 
-
-
     public bool CheckThreeInARow()
     {
         bool found = false;
 
-        for (int y = 0; y < size; y++)
+        for (int j = 0; j < y; j++)
         {
-            for (int x = 0; x < size; x++)
+            for (int i = 0; i < x; i++)
             {
-                if(gridItems[x, y] == null) continue;
+                if (gridItems[i, j] == null) continue;
 
-                int idx = gridItems[x, y].boxIndex;
-                Debug.Log($"Checking position ({x},{y}) with boxIndex {idx}");
+                int idx = gridItems[i, j].boxIndex;
+                Debug.Log($"Checking position ({i},{j}) with boxIndex {idx}");
 
                 if (idx == -1) continue;
 
                 // left start
-                if (x + 2 < size &&
-                    gridItems[x + 1, y] != null &&
-                    gridItems[x + 2, y] != null &&
-                    gridItems[x + 1, y].boxIndex == idx &&
-                    gridItems[x + 2, y].boxIndex == idx)
+                if (i + 2 < x &&
+                    gridItems[i + 1, j] != null &&
+                    gridItems[i + 2, j] != null &&
+                    gridItems[i + 1, j].boxIndex == idx &&
+                    gridItems[i + 2, j].boxIndex == idx)
                 {
-                    Debug.Log($"3 in a row at ({x},{y}), ({x + 1},{y}), ({x + 2},{y}) with index {idx}");
+                    Debug.Log($"3 in a row at ({i},{j}), ({i + 1},{j}), ({i + 2},{j}) with index {idx}");
                     found = true;
                 }
 
                 // middle start
-                if (x - 1 >= 0 && x + 1 < size &&
-                    gridItems[x - 1, y] != null &&
-                    gridItems[x + 1, y] != null &&
-                    gridItems[x - 1, y].boxIndex == idx &&
-                    gridItems[x + 1, y].boxIndex == idx)
+                if (i - 1 >= 0 && i + 1 < x &&
+                    gridItems[i - 1, j] != null &&
+                    gridItems[i + 1, j] != null &&
+                    gridItems[i - 1, j].boxIndex == idx &&
+                    gridItems[i + 1, j].boxIndex == idx)
                 {
-                    Debug.Log($"3 in a row at ({x - 1},{y}), ({x},{y}), ({x + 1},{y}) with index {idx}");
+                    Debug.Log($"3 in a row at ({i - 1},{j}), ({i},{j}), ({i + 1},{j}) with index {idx}");
                     found = true;
                 }
 
                 // right start
-                if (x - 2 >= 0 &&
-                    gridItems[x - 1, y] != null &&
-                    gridItems[x - 2, y] != null &&
-                    gridItems[x - 1, y].boxIndex == idx &&
-                    gridItems[x - 2, y].boxIndex == idx)
+                if (i - 2 >= 0 &&
+                    gridItems[i - 1, j] != null &&
+                    gridItems[i - 2, j] != null &&
+                    gridItems[i - 1, j].boxIndex == idx &&
+                    gridItems[i - 2, j].boxIndex == idx)
                 {
-                    Debug.Log($"3 in a row at ({x - 2},{y}), ({x - 1},{y}), ({x},{y}) with index {idx}");
+                    Debug.Log($"3 in a row at ({i - 2},{j}), ({i - 1},{j}), ({i},{j}) with index {idx}");
                     found = true;
                 }
             }
@@ -161,59 +173,58 @@ public class Grid : MonoBehaviour
     {
         List<Vector2Int> positionsToRemove = new List<Vector2Int>();
 
-        for (int y = 0; y < size; y++)
+        for (int j = 0; j < y; j++)
         {
-            for (int x = 0; x < size - 2; x++)
+            for (int i = 0; i < x - 2; i++)
             {
-                if (gridItems[x, y] == null ||
-                    gridItems[x + 1, y] == null ||
-                    gridItems[x + 2, y] == null)
+                if (gridItems[i, j] == null ||
+                    gridItems[i + 1, j] == null ||
+                    gridItems[i + 2, j] == null)
                     continue;
 
-                int idx = gridItems[x, y].boxIndex;
+                int idx = gridItems[i, j].boxIndex;
                 if (idx == -1) continue;
 
                 // check if three in row has the same
-                if (gridItems[x + 1, y].boxIndex == idx &&
-                    gridItems[x + 2, y].boxIndex == idx)
+                if (gridItems[i + 1, j].boxIndex == idx &&
+                    gridItems[i + 2, j].boxIndex == idx)
                 {
                     // add those
-                    positionsToRemove.Add(new Vector2Int(x, y));
-                    positionsToRemove.Add(new Vector2Int(x + 1, y));
-                    positionsToRemove.Add(new Vector2Int(x + 2, y));
+                    positionsToRemove.Add(new Vector2Int(i, j));
+                    positionsToRemove.Add(new Vector2Int(i + 1, j));
+                    positionsToRemove.Add(new Vector2Int(i + 2, j));
 
                     // check if left has the same symbol
-                    if (x - 1 >= 0 && gridItems[x - 1, y] != null &&
-                    gridItems[x - 1, y].boxIndex == idx)
-                        positionsToRemove.Add(new Vector2Int(x - 1, y));
+                    if (i - 1 >= 0 && gridItems[i - 1, j] != null &&
+                        gridItems[i - 1, j].boxIndex == idx)
+                        positionsToRemove.Add(new Vector2Int(i - 1, j));
 
                     // check if right has the same symbol
-                    if (x + 3 < size && gridItems[x + 3, y] != null &&
-                    gridItems[x + 3, y].boxIndex == idx)
-                        positionsToRemove.Add(new Vector2Int(x + 3, y));
+                    if (i + 3 < x && gridItems[i + 3, j] != null &&
+                        gridItems[i + 3, j].boxIndex == idx)
+                        positionsToRemove.Add(new Vector2Int(i + 3, j));
 
                     // check above
-                    if (y + 1 < size)
+                    if (j + 1 < y)
                     {
-                        if (gridItems[x, y + 1] != null && gridItems[x, y + 1].boxIndex == idx)
-                            positionsToRemove.Add(new Vector2Int(x, y + 1));
-                        if (gridItems[x + 1, y + 1] != null && gridItems[x + 1, y + 1].boxIndex == idx)
-                            positionsToRemove.Add(new Vector2Int(x + 1, y + 1));
-                        if (gridItems[x + 2, y + 1] != null && gridItems[x + 2, y + 1].boxIndex == idx)
-                            positionsToRemove.Add(new Vector2Int(x + 2, y + 1));
+                        if (gridItems[i, j + 1] != null && gridItems[i, j + 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(i, j + 1));
+                        if (gridItems[i + 1, j + 1] != null && gridItems[i + 1, j + 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(i + 1, j + 1));
+                        if (gridItems[i + 2, j + 1] != null && gridItems[i + 2, j + 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(i + 2, j + 1));
                     }
 
                     // checkt bellow
-                    if (y - 1 >= 0)
-                        if (y - 1 >= 0)
-                        {
-                            if (gridItems[x, y - 1] != null && gridItems[x, y - 1].boxIndex == idx)
-                                positionsToRemove.Add(new Vector2Int(x, y - 1));
-                            if (gridItems[x + 1, y - 1] != null && gridItems[x + 1, y - 1].boxIndex == idx)
-                                positionsToRemove.Add(new Vector2Int(x + 1, y - 1));
-                            if (gridItems[x + 2, y - 1] != null && gridItems[x + 2, y - 1].boxIndex == idx)
-                                positionsToRemove.Add(new Vector2Int(x + 2, y - 1));
-                        }
+                    if (j - 1 >= 0)
+                    {
+                        if (gridItems[i, j - 1] != null && gridItems[i, j - 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(i, j - 1));
+                        if (gridItems[i + 1, j - 1] != null && gridItems[i + 1, j - 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(i + 1, j - 1));
+                        if (gridItems[i + 2, j - 1] != null && gridItems[i + 2, j - 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(i + 2, j - 1));
+                    }
                 }
             }
         }
@@ -238,26 +249,26 @@ public class Grid : MonoBehaviour
 
     public void DropDown()
     {
-        for (int x = 0; x < size; x++)
+        for (int i = 0; i < x; i++)
         {
-            for (int y = 1; y < size; y++)
+            for (int j = 1; j < y; j++)
             {
-                if (gridItems[x, y] != null && gridItems[x, y - 1] == null)
+                if (gridItems[i, j] != null && gridItems[i, j - 1] == null)
                 {
                     // Move down one step
-                    GridItem item = gridItems[x, y];
+                    GridItem item = gridItems[i, j];
 
                     // Change array
-                    gridItems[x, y - 1] = item;
-                    gridItems[x, y] = null;
+                    gridItems[i, j - 1] = item;
+                    gridItems[i, j] = null;
 
                     // update kordinates
-                    item.y = y - 1;
+                    item.y = j - 1;
 
                     // update pos
-                    item.transform.position = new Vector3(x * spacing, (y - 1) * spacing, 0);
+                    item.transform.position = new Vector3(i * spacing, (j - 1) * spacing, 0);
 
-                    y = 0;
+                    j = 0; // restart checking this column from bottom
                 }
             }
         }
