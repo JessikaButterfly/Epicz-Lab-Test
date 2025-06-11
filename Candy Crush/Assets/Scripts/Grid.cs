@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
@@ -74,7 +75,11 @@ public class Grid : MonoBehaviour
         Debug.Log($"Swapped items: a({a.x},{a.y}) boxIndex={a.boxIndex}, b({b.x},{b.y}) boxIndex={b.boxIndex}");
 
         if (CheckThreeInARow())
-            Debug.Log("Three in a row found!");
+        {
+            List<Vector2Int> toRemove = GetPositionsToRemove();
+            RemoveItems(toRemove);
+            Debug.Log("Removed items around three in a row!");
+        }
         else
         {
             Debug.Log("No three in a row, swapping back.");
@@ -140,8 +145,74 @@ public class Grid : MonoBehaviour
         return found;
     }
 
+    public List<Vector2Int> GetPositionsToRemove()
+    {
+        List<Vector2Int> positionsToRemove = new List<Vector2Int>();
 
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size - 2; x++)
+            {
+                int idx = gridItems[x, y].boxIndex;
+                if (idx == -1) continue;
 
+                // check if three in row has the same
+                if (gridItems[x + 1, y].boxIndex == idx &&
+                    gridItems[x + 2, y].boxIndex == idx)
+                {
+                    // add those
+                    positionsToRemove.Add(new Vector2Int(x, y));
+                    positionsToRemove.Add(new Vector2Int(x + 1, y));
+                    positionsToRemove.Add(new Vector2Int(x + 2, y));
 
+                    // check if left has the same symbol
+                    if (x - 1 >= 0 && gridItems[x - 1, y].boxIndex == idx)
+                        positionsToRemove.Add(new Vector2Int(x - 1, y));
 
+                    // check if right has the same symbol
+                    if (x + 3 < size && gridItems[x + 3, y].boxIndex == idx)
+                        positionsToRemove.Add(new Vector2Int(x + 3, y));
+
+                    // check above
+                    if (y + 1 < size)
+                    {
+                        if (gridItems[x, y + 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(x, y + 1));
+                        if (gridItems[x + 1, y + 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(x + 1, y + 1));
+                        if (gridItems[x + 2, y + 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(x + 2, y + 1));
+                    }
+
+                    // checkt bellow
+                    if (y - 1 >= 0)
+                    {
+                        if (gridItems[x, y - 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(x, y - 1));
+                        if (gridItems[x + 1, y - 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(x + 1, y - 1));
+                        if (gridItems[x + 2, y - 1].boxIndex == idx)
+                            positionsToRemove.Add(new Vector2Int(x + 2, y - 1));
+                    }
+                }
+            }
+        }
+
+        // remove dublicates
+        HashSet<Vector2Int> uniquePositions = new HashSet<Vector2Int>(positionsToRemove);
+        return new List<Vector2Int>(uniquePositions);
+    }
+
+    public void RemoveItems(List<Vector2Int> positions)
+    {
+        foreach (var pos in positions)
+        {
+            GridItem item = gridItems[pos.x, pos.y];
+            if (item != null)
+            {
+                Destroy(item.gameObject);
+                gridItems[pos.x, pos.y] = null;
+            }
+        }
+    }
 }
