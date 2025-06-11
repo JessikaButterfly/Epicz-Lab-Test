@@ -112,6 +112,8 @@ public class Grid : MonoBehaviour
         {
             for (int x = 0; x < size; x++)
             {
+                if(gridItems[x, y] == null) continue;
+
                 int idx = gridItems[x, y].boxIndex;
                 Debug.Log($"Checking position ({x},{y}) with boxIndex {idx}");
 
@@ -119,6 +121,8 @@ public class Grid : MonoBehaviour
 
                 // left start
                 if (x + 2 < size &&
+                    gridItems[x + 1, y] != null &&
+                    gridItems[x + 2, y] != null &&
                     gridItems[x + 1, y].boxIndex == idx &&
                     gridItems[x + 2, y].boxIndex == idx)
                 {
@@ -128,6 +132,8 @@ public class Grid : MonoBehaviour
 
                 // middle start
                 if (x - 1 >= 0 && x + 1 < size &&
+                    gridItems[x - 1, y] != null &&
+                    gridItems[x + 1, y] != null &&
                     gridItems[x - 1, y].boxIndex == idx &&
                     gridItems[x + 1, y].boxIndex == idx)
                 {
@@ -137,6 +143,8 @@ public class Grid : MonoBehaviour
 
                 // right start
                 if (x - 2 >= 0 &&
+                    gridItems[x - 1, y] != null &&
+                    gridItems[x - 2, y] != null &&
                     gridItems[x - 1, y].boxIndex == idx &&
                     gridItems[x - 2, y].boxIndex == idx)
                 {
@@ -157,6 +165,11 @@ public class Grid : MonoBehaviour
         {
             for (int x = 0; x < size - 2; x++)
             {
+                if (gridItems[x, y] == null ||
+                    gridItems[x + 1, y] == null ||
+                    gridItems[x + 2, y] == null)
+                    continue;
+
                 int idx = gridItems[x, y].boxIndex;
                 if (idx == -1) continue;
 
@@ -170,34 +183,37 @@ public class Grid : MonoBehaviour
                     positionsToRemove.Add(new Vector2Int(x + 2, y));
 
                     // check if left has the same symbol
-                    if (x - 1 >= 0 && gridItems[x - 1, y].boxIndex == idx)
+                    if (x - 1 >= 0 && gridItems[x - 1, y] != null &&
+                    gridItems[x - 1, y].boxIndex == idx)
                         positionsToRemove.Add(new Vector2Int(x - 1, y));
 
                     // check if right has the same symbol
-                    if (x + 3 < size && gridItems[x + 3, y].boxIndex == idx)
+                    if (x + 3 < size && gridItems[x + 3, y] != null &&
+                    gridItems[x + 3, y].boxIndex == idx)
                         positionsToRemove.Add(new Vector2Int(x + 3, y));
 
                     // check above
                     if (y + 1 < size)
                     {
-                        if (gridItems[x, y + 1].boxIndex == idx)
+                        if (gridItems[x, y + 1] != null && gridItems[x, y + 1].boxIndex == idx)
                             positionsToRemove.Add(new Vector2Int(x, y + 1));
-                        if (gridItems[x + 1, y + 1].boxIndex == idx)
+                        if (gridItems[x + 1, y + 1] != null && gridItems[x + 1, y + 1].boxIndex == idx)
                             positionsToRemove.Add(new Vector2Int(x + 1, y + 1));
-                        if (gridItems[x + 2, y + 1].boxIndex == idx)
+                        if (gridItems[x + 2, y + 1] != null && gridItems[x + 2, y + 1].boxIndex == idx)
                             positionsToRemove.Add(new Vector2Int(x + 2, y + 1));
                     }
 
                     // checkt bellow
                     if (y - 1 >= 0)
-                    {
-                        if (gridItems[x, y - 1].boxIndex == idx)
-                            positionsToRemove.Add(new Vector2Int(x, y - 1));
-                        if (gridItems[x + 1, y - 1].boxIndex == idx)
-                            positionsToRemove.Add(new Vector2Int(x + 1, y - 1));
-                        if (gridItems[x + 2, y - 1].boxIndex == idx)
-                            positionsToRemove.Add(new Vector2Int(x + 2, y - 1));
-                    }
+                        if (y - 1 >= 0)
+                        {
+                            if (gridItems[x, y - 1] != null && gridItems[x, y - 1].boxIndex == idx)
+                                positionsToRemove.Add(new Vector2Int(x, y - 1));
+                            if (gridItems[x + 1, y - 1] != null && gridItems[x + 1, y - 1].boxIndex == idx)
+                                positionsToRemove.Add(new Vector2Int(x + 1, y - 1));
+                            if (gridItems[x + 2, y - 1] != null && gridItems[x + 2, y - 1].boxIndex == idx)
+                                positionsToRemove.Add(new Vector2Int(x + 2, y - 1));
+                        }
                 }
             }
         }
@@ -259,6 +275,4 @@ public class Grid : MonoBehaviour
             foundMatch = CheckThreeInARow();
         }
     }
-
-
 }
