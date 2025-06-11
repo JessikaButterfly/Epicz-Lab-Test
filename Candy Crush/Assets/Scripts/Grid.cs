@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Grid : MonoBehaviour
 {
@@ -78,8 +79,11 @@ public class Grid : MonoBehaviour
         {
             List<Vector2Int> toRemove = GetPositionsToRemove();
             RemoveItems(toRemove);
+            DropDown();
+            OnSwapComplete();
             Debug.Log("Removed items around three in a row!");
         }
+
         else
         {
             Debug.Log("No three in a row, swapping back.");
@@ -215,4 +219,46 @@ public class Grid : MonoBehaviour
             }
         }
     }
+
+    public void DropDown()
+    {
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 1; y < size; y++)
+            {
+                if (gridItems[x, y] != null && gridItems[x, y - 1] == null)
+                {
+                    // Move down one step
+                    GridItem item = gridItems[x, y];
+
+                    // Change array
+                    gridItems[x, y - 1] = item;
+                    gridItems[x, y] = null;
+
+                    // update kordinates
+                    item.y = y - 1;
+
+                    // update pos
+                    item.transform.position = new Vector3(x * spacing, (y - 1) * spacing, 0);
+
+                    y = 0;
+                }
+            }
+        }
+    }
+
+    public void OnSwapComplete()
+    {
+        bool foundMatch = CheckThreeInARow();
+
+        while (foundMatch)
+        {
+            List<Vector2Int> toRemove = GetPositionsToRemove();
+            RemoveItems(toRemove);
+            DropDown();
+            foundMatch = CheckThreeInARow();
+        }
+    }
+
+
 }
