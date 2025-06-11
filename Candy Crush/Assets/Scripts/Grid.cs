@@ -57,10 +57,9 @@ public class Grid : MonoBehaviour
         int bx = b.x;
         int by = b.y;
 
-        // change index
-        int tempIndex = a.boxIndex;
-        a.boxIndex = b.boxIndex;
-        b.boxIndex = tempIndex;
+        // change index in array
+        gridItems[ax, ay] = b;
+        gridItems[bx, by] = a;
 
         // change kordinates
         a.x = bx;
@@ -71,10 +70,6 @@ public class Grid : MonoBehaviour
         // change pos
         a.transform.position = new Vector3(a.x * spacing, a.y * spacing, 0);
         b.transform.position = new Vector3(b.x * spacing, b.y * spacing, 0);
-
-        // change boxIndex
-        gridItems[a.x, a.y] = a;
-        gridItems[b.x, b.y] = b;
 
         Debug.Log($"Swapped items: a({a.x},{a.y}) boxIndex={a.boxIndex}, b({b.x},{b.y}) boxIndex={b.boxIndex}");
 
@@ -87,24 +82,52 @@ public class Grid : MonoBehaviour
 
 
     public bool CheckThreeInARow()
-{
-    for (int y = 0; y < size; y++)
     {
-        for (int x = 0; x < size - 2; x++)
-        {
-            int idx = gridItems[x, y].boxIndex;
-            if (idx == -1) continue;
+        bool found = false;
 
-            if (gridItems[x + 1, y].boxIndex == idx &&
-                gridItems[x + 2, y].boxIndex == idx)
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
             {
-                Debug.Log($"3 in a row at ({x},{y}), ({x+1},{y}), ({x+2},{y}) with index {idx}");
-                return true;
+                int idx = gridItems[x, y].boxIndex;
+                Debug.Log($"Checking position ({x},{y}) with boxIndex {idx}");
+
+                if (idx == -1) continue;
+
+                // left start
+                if (x + 2 < size &&
+                    gridItems[x + 1, y].boxIndex == idx &&
+                    gridItems[x + 2, y].boxIndex == idx)
+                {
+                    Debug.Log($"3 in a row at ({x},{y}), ({x + 1},{y}), ({x + 2},{y}) with index {idx}");
+                    found = true;
+                }
+
+                // middle start
+                if (x - 1 >= 0 && x + 1 < size &&
+                    gridItems[x - 1, y].boxIndex == idx &&
+                    gridItems[x + 1, y].boxIndex == idx)
+                {
+                    Debug.Log($"3 in a row at ({x - 1},{y}), ({x},{y}), ({x + 1},{y}) with index {idx}");
+                    found = true;
+                }
+
+                // right start
+                if (x - 2 >= 0 &&
+                    gridItems[x - 1, y].boxIndex == idx &&
+                    gridItems[x - 2, y].boxIndex == idx)
+                {
+                    Debug.Log($"3 in a row at ({x - 2},{y}), ({x - 1},{y}), ({x},{y}) with index {idx}");
+                    found = true;
+                }
             }
         }
+
+        return found;
     }
-    return false;
-}
+
+
+
 
 
 }
