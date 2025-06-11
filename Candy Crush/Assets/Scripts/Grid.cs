@@ -20,9 +20,9 @@ public class Grid : MonoBehaviour
         for (int x = 0; x < size; x++)
         {
             //Instantiate fr each row
-            for (int z = 0; z < size; z++)
+            for (int y = 0; y < size; y++)
             {
-                Vector3 spawnPos = new Vector3(x * spacing, 0f, z * spacing);
+                Vector3 spawnPos = new Vector3(x * spacing, y * spacing, 0f);
                 Instantiate(box, spawnPos, Quaternion.identity, transform);
             }
         }
