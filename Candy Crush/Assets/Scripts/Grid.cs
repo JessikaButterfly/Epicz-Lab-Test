@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -66,6 +67,24 @@ public class Grid : MonoBehaviour
         }
     }
 
+    public GridItem GetItemAt(int x, int y)
+    {
+        if (x >= 0 && x < this.x && y >= 0 && y < this.y)
+            return gridItems[x, y];
+        return null;
+    }
+
+    public GridItem[] GetNeighbors(int x, int y)
+    {
+        return new GridItem[]
+        {
+        GetItemAt(x + 1, y),
+        GetItemAt(x - 1, y),
+        GetItemAt(x, y + 1),
+        GetItemAt(x, y - 1)
+        };
+    }
+
     public void SwapItems(GridItem a, GridItem b)
     {
         // old kordinates
@@ -95,7 +114,7 @@ public class Grid : MonoBehaviour
             List<Vector2Int> toRemove = GetPositionsToRemove();
             RemoveItems(toRemove);
             DropDown();
-            OnSwapComplete();
+            StartCoroutine(OnSwapComplete());
             Debug.Log("Removed items around three in a row!");
         }
 
@@ -246,7 +265,6 @@ public class Grid : MonoBehaviour
             }
         }
     }
-
     public void DropDown()
     {
         for (int i = 0; i < x; i++)
@@ -266,7 +284,10 @@ public class Grid : MonoBehaviour
                     item.y = j - 1;
 
                     // update pos
-                    item.transform.position = new Vector3(i * spacing, (j - 1) * spacing, 0);
+                    Vector3 targetPos = new Vector3(i * spacing, (j - 1) * spacing, 0);
+
+                    // anim
+                    StartCoroutine(MoveOverTime(item.transform, targetPos, 0.5f));
 
                     j = 0; // restart checking this column from bottom
                 }
@@ -274,16 +295,40 @@ public class Grid : MonoBehaviour
         }
     }
 
-    public void OnSwapComplete()
+    private IEnumerator MoveOverTime(Transform item, Vector3 targetPosition, float duration)
     {
+        Vector3 start = item.position;
+        float time = 0f;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            float t = time / duration;
+            item.position = Vector3.Lerp(start, targetPosition, t);
+            yield return null;
+        }
+
+        item.position = targetPosition;
+    }
+
+    public IEnumerator OnSwapComplete()
+    {
+        yield return null;
+
         bool foundMatch = CheckThreeInARow();
 
         while (foundMatch)
         {
             List<Vector2Int> toRemove = GetPositionsToRemove();
+
+            yield return new WaitForSeconds(0.9f);
+
             RemoveItems(toRemove);
+
             DropDown();
+
             foundMatch = CheckThreeInARow();
         }
     }
+
 }
