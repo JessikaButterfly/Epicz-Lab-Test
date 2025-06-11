@@ -299,6 +299,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   box: {fileID: 7441553581681424250}
+  boxOptions:
+  - {fileID: 3332325271510263225, guid: ecf746a3b75cceb4890212a911d8c4f6, type: 3}
+  - {fileID: 6392029118540138028, guid: 2ebb9d0195b8bde4f83550391a318127, type: 3}
+  - {fileID: 4660899584622639538, guid: abe69f7197a302348aaa8c5b49daa89b, type: 3}
+  - {fileID: 6285867983514357855, guid: 4e3941ed6934dc546ac0f57ce00a74e6, type: 3}
   size: 5
   spacing: 1.1
 --- !u!1660057539 &9223372036854775807
