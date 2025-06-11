@@ -76,7 +76,21 @@ public class Grid : MonoBehaviour
         if (CheckThreeInARow())
             Debug.Log("Three in a row found!");
         else
-            Debug.Log("No three in a row.");
+        {
+            Debug.Log("No three in a row, swapping back.");
+
+            // back to old pos
+            gridItems[ax, ay] = a;
+            gridItems[bx, by] = b;
+
+            a.x = ax;
+            a.y = ay;
+            b.x = bx;
+            b.y = by;
+
+            a.transform.position = new Vector3(a.x * spacing, a.y * spacing, 0);
+            b.transform.position = new Vector3(b.x * spacing, b.y * spacing, 0);
+        }
     }
 
 
